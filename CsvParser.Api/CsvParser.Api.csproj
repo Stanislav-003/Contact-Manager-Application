@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+	
+  <ItemGroup>
+    <ProjectReference Include="..\CsvParser.Application\CsvParser.Application.csproj" />
+    <ProjectReference Include="..\CsvParser.Contracts\CsvParser.Contracts.csproj" />
+    <ProjectReference Include="..\CsvParser.Infrastructure\CsvParser.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

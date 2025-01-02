@@ -1,0 +1,7 @@
+@host=http://localhost:5053
+
+Delete {{host}}/CSV/b65ce87e-51b7-4934-b73a-c765d463b7c1
+Content-Type: application/json
+{
+    "id": "5f2e5e00-64b4-4912-b065-22829f219bbb"
+}

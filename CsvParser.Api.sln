@@ -1,0 +1,62 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35327.3
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CsvParser.Api", "CsvParser.Api\CsvParser.Api.csproj", "{E97CE1EC-C8BC-4377-81B1-EBB7BEB6B30D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CsvParser.Contracts", "CsvParser.Contracts\CsvParser.Contracts.csproj", "{94FD57A0-4FB7-4C57-BA09-1A717DA7D371}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CsvParser.Infrastructure", "CsvParser.Infrastructure\CsvParser.Infrastructure.csproj", "{B348F75D-03C3-43E1-A236-F51AB08ED5BA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CsvParser.Application", "CsvParser.Application\CsvParser.Application.csproj", "{0E03E3C5-11B0-4552-ACAD-7C1209DD6D37}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CsvParser.Domain", "CsvParser.Domain\CsvParser.Domain.csproj", "{0D54D98E-D203-4DE4-B44A-331B3598502E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Requests", "Requests", "{B3D8C11F-7D0C-48E8-9D74-9495342B3C7F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CSVs", "CSVs", "{45F641E2-FD20-455B-8A5A-BE52429D74FA}"
+	ProjectSection(SolutionItems) = preProject
+		CreateCSV.http = CreateCSV.http
+		DeleteCsv.http = DeleteCsv.http
+		GetAllCsvs.http = GetAllCsvs.http
+		UpdateCsv.http = UpdateCsv.http
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E97CE1EC-C8BC-4377-81B1-EBB7BEB6B30D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E97CE1EC-C8BC-4377-81B1-EBB7BEB6B30D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E97CE1EC-C8BC-4377-81B1-EBB7BEB6B30D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E97CE1EC-C8BC-4377-81B1-EBB7BEB6B30D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94FD57A0-4FB7-4C57-BA09-1A717DA7D371}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94FD57A0-4FB7-4C57-BA09-1A717DA7D371}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94FD57A0-4FB7-4C57-BA09-1A717DA7D371}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94FD57A0-4FB7-4C57-BA09-1A717DA7D371}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B348F75D-03C3-43E1-A236-F51AB08ED5BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B348F75D-03C3-43E1-A236-F51AB08ED5BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B348F75D-03C3-43E1-A236-F51AB08ED5BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B348F75D-03C3-43E1-A236-F51AB08ED5BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0E03E3C5-11B0-4552-ACAD-7C1209DD6D37}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E03E3C5-11B0-4552-ACAD-7C1209DD6D37}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E03E3C5-11B0-4552-ACAD-7C1209DD6D37}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E03E3C5-11B0-4552-ACAD-7C1209DD6D37}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D54D98E-D203-4DE4-B44A-331B3598502E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D54D98E-D203-4DE4-B44A-331B3598502E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D54D98E-D203-4DE4-B44A-331B3598502E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D54D98E-D203-4DE4-B44A-331B3598502E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{45F641E2-FD20-455B-8A5A-BE52429D74FA} = {B3D8C11F-7D0C-48E8-9D74-9495342B3C7F}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8A325F41-FF49-472F-BA34-9B6E09A7457A}
+	EndGlobalSection
+EndGlobal
