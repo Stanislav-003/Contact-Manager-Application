@@ -1,0 +1,6 @@
+@host=http://localhost:5053
+
+Get {{host}}/CSV/70b63303-4bcc-4183-81cd-80876f2cbc6c
+Content-Type: application/json
+{
+}

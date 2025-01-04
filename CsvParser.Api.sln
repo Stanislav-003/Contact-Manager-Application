@@ -20,8 +20,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CSVs", "CSVs", "{45F641E2-F
 		CreateCSV.http = CreateCSV.http
 		DeleteCsv.http = DeleteCsv.http
 		GetAllCsvs.http = GetAllCsvs.http
+		GetCsvById.http = GetCsvById.http
 		UpdateCsv.http = UpdateCsv.http
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CsvParser.Web", "CsvParser.Web\CsvParser.Web.csproj", "{73D843B5-7BCD-4599-91FF-1C927357B624}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -49,6 +52,10 @@ Global
 		{0D54D98E-D203-4DE4-B44A-331B3598502E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0D54D98E-D203-4DE4-B44A-331B3598502E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0D54D98E-D203-4DE4-B44A-331B3598502E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{73D843B5-7BCD-4599-91FF-1C927357B624}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73D843B5-7BCD-4599-91FF-1C927357B624}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73D843B5-7BCD-4599-91FF-1C927357B624}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73D843B5-7BCD-4599-91FF-1C927357B624}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

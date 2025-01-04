@@ -43,11 +43,6 @@ public class CSVRepository : ICSVRepository
         return await _context.CSVs.FirstOrDefaultAsync(csv => csv.Id == id);
     }
 
-    public Task<IEnumerable<CSV>> GetByNameAsync(string name)
-    {
-        throw new NotImplementedException();
-    }
-
     public async Task<bool> ExistsAsync(Guid csvId)
     {
         return await _context.CSVs.AnyAsync(csv => csv.Id == csvId);

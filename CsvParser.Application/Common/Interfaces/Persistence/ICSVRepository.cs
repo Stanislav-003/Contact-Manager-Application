@@ -15,6 +15,4 @@ public interface ICSVRepository
     Task<bool> ExistsAsync(Guid csvId);
 
     Task DeleteAsync(Guid id);
-
-    Task<IEnumerable<CsvParser.Domain.Models.CSV>> GetByNameAsync(string name);
 }

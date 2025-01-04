@@ -9,7 +9,7 @@ public class UpdateCSVCommandValidator : AbstractValidator<UpdateCSVCommand>
     {
         RuleFor(x => x.Name).NotEmpty().MaximumLength(30);
         RuleFor(x => x.BirthDate).NotEmpty().LessThan(new DateTime(1990, 1, 1));
-        RuleFor(x => x.IsMarried).NotEmpty();
+        //RuleFor(x => x.IsMarried).NotEmpty();
         RuleFor(x => x.Phone).NotEmpty().MaximumLength(10);
         RuleFor(x => x.Salary).NotEmpty().GreaterThanOrEqualTo(500);
     }

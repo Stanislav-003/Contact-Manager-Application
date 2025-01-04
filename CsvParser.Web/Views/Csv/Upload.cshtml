@@ -1,0 +1,34 @@
+﻿<h1>Upload CSV File</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        @if (!string.IsNullOrEmpty(ViewData["Message"]?.ToString()))
+
+        {
+            <div class="alert alert-info">
+                @ViewData["Message"]
+            </div>
+        }
+
+        @if (!ViewData.ModelState.IsValid)
+
+        {
+            <div class="alert alert-danger">
+                @Html.ValidationSummary(false)
+            </div>
+        }
+
+        <form asp-action="Upload" asp-controller="Csv" method="post" enctype="multipart/form-data">
+            <div class="form-group mb-3">
+                <label for="file" class="form-label">Choose CSV file</label>
+                <input type="file"
+                       id="file"
+                       name="file"
+                       class="form-control"
+                       accept=".csv"
+                       required />
+            </div>
+            <button type="submit" class="btn btn-primary">Upload</button>
+        </form>
+    </div>
+</div>

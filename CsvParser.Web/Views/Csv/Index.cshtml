@@ -1,0 +1,35 @@
+﻿@model List<CsvParser.Web.Models.CsvViewModel>
+
+<h1>Uploaded CSV Records</h1>
+
+<!-- Button for uploading CSV -->
+<a href="@Url.Action("Upload", "Csv")" class="btn btn-success mb-3">Upload CSV</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Date of Birth</th>
+            <th>Married</th>
+            <th>Phone</th>
+            <th>Salary</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var csv in Model)
+        {
+            <tr>
+                <td>@csv.Name</td>
+                <td>@csv.BirthDate.ToShortDateString()</td>
+                <td>@(csv.IsMarried ? "Yes" : "No")</td>
+                <td>@csv.Phone</td>
+                <td>@csv.Salary.ToString("C")</td>
+                <td>
+                    <a href="@Url.Action("Edit", "Csv", new { id = csv.Id })" class="btn btn-primary">Edit</a>
+                    <a href="@Url.Action("Delete", "Csv", new { id = csv.Id })" class="btn btn-danger" onclick="return confirm('Are you sure?')">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

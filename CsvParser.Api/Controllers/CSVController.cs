@@ -1,6 +1,7 @@
 ﻿using CsvParser.Application.CSV.Commands.CreateCSV;
 using CsvParser.Application.CSV.Commands.DeleteCSV;
 using CsvParser.Application.CSV.Commands.UpdateCSV;
+using CsvParser.Application.CSV.Queries.Csv;
 using CsvParser.Application.CSV.Queries.ListCsvs;
 using CsvParser.Contracts.CSVs;
 using MediatR;
@@ -57,6 +58,24 @@ public class CSVController : ApiController
                 csv.Phone,
                 csv.Salary))),
             errors => Problem(errors));
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetCsvById(Guid id)
+    {
+        var query = new CsvQuery(id); 
+
+        var csvResult = await _mediator.Send(query);
+
+        return csvResult.Match(
+            csv => Ok(new CsvResponse( 
+                csv.Id,
+                csv.Name,
+                csv.BirthDate,
+                csv.IsMarried,
+                csv.Phone,
+                csv.Salary)),
+            errors => Problem(errors)); 
     }
 
     [HttpPut]
