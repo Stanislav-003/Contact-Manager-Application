@@ -7,23 +7,28 @@ namespace CsvParser.Web.Controllers;
 
 public class CsvController : Controller
 {
-    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ICsvService _csvService;
     private readonly ILogger<CsvController> _logger;
 
-    public CsvController(IHttpClientFactory httpClientFactory, ICsvService csvService, ILogger<CsvController> logger)
+    public CsvController(ICsvService csvService, ILogger<CsvController> logger)
     {
-        _httpClientFactory = httpClientFactory;
         _csvService = csvService;
         _logger = logger;
     }
 
     public async Task<IActionResult> Index()
     {
-        var client = _httpClientFactory.CreateClient("CsvApi");
-        var response = await client.GetAsync("CSV");
-        var csvRecords = await response.Content.ReadFromJsonAsync<List<CsvViewModel>>();
-        return View(csvRecords);
+        try
+        {
+            var csvRecords = await _csvService.GetAllAsync();
+            return View(csvRecords);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while fetching CSV records");
+            TempData["ErrorMessage"] = "Failed to load CSV records. Please try again later.";
+            return View(Enumerable.Empty<CsvViewModel>());
+        }
     }
 
     public IActionResult Upload()
@@ -59,10 +64,11 @@ public class CsvController : Controller
             }
 
             TempData["SuccessMessage"] = $"Successfully uploaded {records.Count} records.";
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error occurred while processing CSV file");
             ModelState.AddModelError("", $"An error occurred while processing the file: {ex.Message}");
             return View();
         }
@@ -70,60 +76,78 @@ public class CsvController : Controller
 
     public async Task<IActionResult> Edit(Guid id)
     {
-        var client = _httpClientFactory.CreateClient("CsvApi");
-        var response = await client.GetAsync($"CSV/{id}"); 
-
-        if (response.IsSuccessStatusCode)
+        try
         {
-            var csv = await response.Content.ReadFromJsonAsync<CsvViewModel>();  
-            return View(csv);  
-        }
+            var csv = await _csvService.GetByIdAsync(id);
 
-        return NotFound();  
+            if (csv == null)
+            {
+                return NotFound();
+            }
+
+            return View(csv);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while fetching CSV record with ID {Id}", id);
+            TempData["ErrorMessage"] = "Failed to load the record. Please try again later.";
+            return RedirectToAction(nameof(Index));
+        }
     }
 
     [HttpPost]
     public async Task<IActionResult> Edit(CsvViewModel model)
     {
-        _logger.LogInformation($"IsMarried value: {model.IsMarried}");
-
-        if (ModelState.IsValid)
-        {
-            try
-            {
-                var client = _httpClientFactory.CreateClient("CsvApi");
-
-                var response = await client.PutAsJsonAsync("CSV", model);
-
-                if (response.IsSuccessStatusCode)
-                    return RedirectToAction(nameof(Index));
-
-                var responseContent = await response.Content.ReadAsStringAsync();
-
-                ModelState.AddModelError("", $"Failed to update the record. {responseContent}");
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Error: {ex.Message}");
-            }
-        }
-        else
+        if (!ModelState.IsValid)
         {
             foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
             {
-                _logger.LogError($"Model Error: {modelError.ErrorMessage}");
+                _logger.LogError("Model Error: {ErrorMessage}", modelError.ErrorMessage);
             }
+            return View(model);
         }
 
-        return View(model);  
+        try
+        {
+            var (success, error) = await _csvService.UpdateAsync(model);
+
+            if (success)
+            {
+                TempData["SuccessMessage"] = "Record updated successfully.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            ModelState.AddModelError("", error ?? "Failed to update the record.");
+            return View(model);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while updating CSV record with ID {Id}", model.Id);
+            ModelState.AddModelError("", "An error occurred while updating the record. Please try again.");
+            return View(model);
+        }
     }
 
     public async Task<IActionResult> Delete(Guid id)
     {
-        var client = _httpClientFactory.CreateClient("CsvApi");
-        var response = await client.DeleteAsync($"CSV/{id}");
-        if (response.IsSuccessStatusCode) return RedirectToAction("Index");
+        try
+        {
+            var (success, error) = await _csvService.DeleteAsync(id);
 
-        return BadRequest("Failed to delete the record.");
+            if (success)
+            {
+                TempData["SuccessMessage"] = "Record deleted successfully.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            TempData["ErrorMessage"] = error ?? "Failed to delete the record.";
+            return RedirectToAction(nameof(Index));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while deleting CSV record with ID {Id}", id);
+            TempData["ErrorMessage"] = "An error occurred while deleting the record.";
+            return RedirectToAction(nameof(Index));
+        }
     }
 }
