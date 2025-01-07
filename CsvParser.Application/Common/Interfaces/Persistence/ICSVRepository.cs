@@ -2,7 +2,7 @@
 
 namespace CsvParser.Application.Common.Interfaces.Persistence;
 
-public interface ICSVRepository
+public interface ICSVRepository : IGenericRepository<CsvParser.Domain.Models.CSV>
 {
     Task<List<CsvParser.Domain.Models.CSV>> GetAllAsync();
 

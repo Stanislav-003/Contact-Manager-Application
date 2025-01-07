@@ -85,7 +85,6 @@ public class CsvController : Controller
     [HttpPost]
     public async Task<IActionResult> Edit(CsvViewModel model)
     {
-        // Добавьте логирование для проверки значения
         _logger.LogInformation($"IsMarried value: {model.IsMarried}");
 
         if (ModelState.IsValid)
@@ -99,7 +98,6 @@ public class CsvController : Controller
                 if (response.IsSuccessStatusCode)
                     return RedirectToAction(nameof(Index));
 
-                // Добавим отладочную информацию
                 var responseContent = await response.Content.ReadAsStringAsync();
 
                 ModelState.AddModelError("", $"Failed to update the record. {responseContent}");
@@ -111,7 +109,6 @@ public class CsvController : Controller
         }
         else
         {
-            // Логируем ошибки ModelState
             foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
             {
                 _logger.LogError($"Model Error: {modelError.ErrorMessage}");

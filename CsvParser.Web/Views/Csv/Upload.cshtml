@@ -1,7 +1,8 @@
-﻿<h1>Upload CSV File</h1>
+﻿<h1 class="text-center mb-4">Upload CSV File</h1>
 
-<div class="row">
+<div class="row justify-content-center">
     <div class="col-md-6">
+
         @if (!string.IsNullOrEmpty(ViewData["Message"]?.ToString()))
 
         {
@@ -28,7 +29,10 @@
                        accept=".csv"
                        required />
             </div>
-            <button type="submit" class="btn btn-primary">Upload</button>
+
+            <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary">Upload</button>
+            </div>
         </form>
     </div>
 </div>

@@ -1,34 +1,43 @@
 ﻿@model CsvParser.Web.Models.CsvViewModel
 
-<h1>Edit CSV Record</h1>
-<form asp-action="Edit" asp-controller="Csv" method="post">
+<h1 class="text-center mb-4">Edit CSV Record</h1>
+<form asp-action="Edit" asp-controller="Csv" method="post" class="mx-auto" style="max-width: 600px;">
     <input type="hidden" asp-for="Id" />
-    <div class="form-group">
-        <label asp-for="Name"></label>
-        <input asp-for="Name" class="form-control" />
+
+    <div class="form-group mb-3">
+        <label asp-for="Name" class="form-label">Full Name</label>
+        <input asp-for="Name" class="form-control" placeholder="Enter full name" />
         <span asp-validation-for="Name" class="text-danger"></span>
     </div>
-    <div class="form-group">
-        <label asp-for="BirthDate"></label>
+
+    <div class="form-group mb-3">
+        <label asp-for="BirthDate" class="form-label">Date of Birth</label>
         <input asp-for="BirthDate" class="form-control" type="date" />
         <span asp-validation-for="BirthDate" class="text-danger"></span>
     </div>
-    <div class="form-group">
-        <label asp-for="IsMarried">Married</label>
-        <div>
+
+    <div class="form-group mb-3">
+        <label asp-for="IsMarried" class="form-label">Marital Status</label>
+        <div class="form-check">
             @Html.CheckBoxFor(m => m.IsMarried, new { @class = "form-check-input" })
+            <label class="form-check-label">Married</label>
         </div>
         <span asp-validation-for="IsMarried" class="text-danger"></span>
     </div>
-    <div class="form-group">
-        <label asp-for="Phone"></label>
-        <input asp-for="Phone" class="form-control" />
+
+    <div class="form-group mb-3">
+        <label asp-for="Phone" class="form-label">Phone Number</label>
+        <input asp-for="Phone" class="form-control" placeholder="Enter phone number" />
         <span asp-validation-for="Phone" class="text-danger"></span>
     </div>
-    <div class="form-group">
-        <label asp-for="Salary"></label>
-        <input asp-for="Salary" class="form-control" />
+
+    <div class="form-group mb-3">
+        <label asp-for="Salary" class="form-label">Salary</label>
+        <input asp-for="Salary" class="form-control" placeholder="Enter salary" />
         <span asp-validation-for="Salary" class="text-danger"></span>
     </div>
-    <button type="submit" class="btn btn-success">Save</button>
+
+    <div class="d-flex justify-content-end">
+        <button type="submit" class="btn btn-success">Save Changes</button>
+    </div>
 </form>

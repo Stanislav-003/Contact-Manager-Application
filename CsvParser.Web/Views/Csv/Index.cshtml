@@ -1,9 +1,8 @@
 ﻿@model List<CsvParser.Web.Models.CsvViewModel>
 
-<h1>Uploaded CSV Records</h1>
-
-<!-- Button for uploading CSV -->
-<a href="@Url.Action("Upload", "Csv")" class="btn btn-success mb-3">Upload CSV</a>
+<div class="mt-5 text-center">
+    <h1>Uploaded CSV Records</h1>
+</div>
 
 <table class="table">
     <thead>
@@ -33,3 +32,7 @@
         }
     </tbody>
 </table>
+
+<div class="text-end mt-3">
+    <a href="@Url.Action("Upload", "Csv")" class="btn btn-success">Upload CSV</a>
+</div>
