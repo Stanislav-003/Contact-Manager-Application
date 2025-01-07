@@ -102,20 +102,21 @@ public class CsvService : ICsvService
 
             var response = await client.PutAsJsonAsync("CSV", updateRequest);
 
+            var responseContent = await response.Content.ReadAsStringAsync();
+
             if (response.IsSuccessStatusCode)
             {
                 return (true, null);
             }
 
-            var error = await response.Content.ReadAsStringAsync();
-            _logger.LogError("Failed to update CSV record. ID: {Id}, Error: {Error}",
-                model.Id, error);
-            return (false, error);
+            _logger.LogError("Failed to update CSV record. ID: {Id}, Status: {Status}, Error: {Error}",
+                model.Id, response.StatusCode, responseContent);
+
+            return (false, responseContent);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occurred while updating CSV record with ID {Id}",
-                model.Id);
+            _logger.LogError(ex, "Error occurred while updating CSV record with ID {Id}", model.Id);
             return (false, ex.Message);
         }
     }

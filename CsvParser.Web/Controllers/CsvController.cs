@@ -2,6 +2,7 @@
 using CsvParser.Web.Interfaces;
 using CsvParser.Web.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace CsvParser.Web.Controllers;
 
@@ -110,14 +111,38 @@ public class CsvController : Controller
         try
         {
             var (success, error) = await _csvService.UpdateAsync(model);
-
             if (success)
             {
                 TempData["SuccessMessage"] = "Record updated successfully.";
                 return RedirectToAction(nameof(Index));
             }
 
-            ModelState.AddModelError("", error ?? "Failed to update the record.");
+            // Разбираем ошибку из API и добавляем в ModelState
+            if (!string.IsNullOrEmpty(error))
+            {
+                try
+                {
+                    // Предполагаем, что ошибка может прийти в формате JSON
+                    var problemDetails = JsonSerializer.Deserialize<ProblemDetails>(error);
+                    if (problemDetails != null)
+                    {
+                        ModelState.AddModelError("", problemDetails.Title ?? problemDetails.Detail ?? "Failed to update the record.");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("", error);
+                    }
+                }
+                catch
+                {
+                    ModelState.AddModelError("", error);
+                }
+            }
+            else
+            {
+                ModelState.AddModelError("", "Failed to update the record.");
+            }
+
             return View(model);
         }
         catch (Exception ex)

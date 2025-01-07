@@ -1,43 +1,83 @@
 ﻿@model CsvParser.Web.Models.CsvViewModel
 
-<h1 class="text-center mb-4">Edit CSV Record</h1>
-<form asp-action="Edit" asp-controller="Csv" method="post" class="mx-auto" style="max-width: 600px;">
-    <input type="hidden" asp-for="Id" />
+<div class="container">
+    <h1 class="text-center mb-4">Edit CSV Record</h1>
 
-    <div class="form-group mb-3">
-        <label asp-for="Name" class="form-label">Full Name</label>
-        <input asp-for="Name" class="form-control" placeholder="Enter full name" />
-        <span asp-validation-for="Name" class="text-danger"></span>
-    </div>
-
-    <div class="form-group mb-3">
-        <label asp-for="BirthDate" class="form-label">Date of Birth</label>
-        <input asp-for="BirthDate" class="form-control" type="date" />
-        <span asp-validation-for="BirthDate" class="text-danger"></span>
-    </div>
-
-    <div class="form-group mb-3">
-        <label asp-for="IsMarried" class="form-label">Marital Status</label>
-        <div class="form-check">
-            @Html.CheckBoxFor(m => m.IsMarried, new { @class = "form-check-input" })
-            <label class="form-check-label">Married</label>
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         </div>
-        <span asp-validation-for="IsMarried" class="text-danger"></span>
-    </div>
+    }
 
-    <div class="form-group mb-3">
-        <label asp-for="Phone" class="form-label">Phone Number</label>
-        <input asp-for="Phone" class="form-control" placeholder="Enter phone number" />
-        <span asp-validation-for="Phone" class="text-danger"></span>
-    </div>
+    <form asp-action="Edit" asp-controller="Csv" method="post" class="mx-auto" style="max-width: 600px;">
+        <input type="hidden" asp-for="Id" />
 
-    <div class="form-group mb-3">
-        <label asp-for="Salary" class="form-label">Salary</label>
-        <input asp-for="Salary" class="form-control" placeholder="Enter salary" />
-        <span asp-validation-for="Salary" class="text-danger"></span>
-    </div>
+        <div class="form-group mb-3">
+            <label asp-for="Name" class="form-label">Full Name</label>
+            <input asp-for="Name" class="form-control" placeholder="Enter full name" />
+            <span asp-validation-for="Name" class="text-danger small"></span>
+        </div>
 
-    <div class="d-flex justify-content-end">
-        <button type="submit" class="btn btn-success">Save Changes</button>
-    </div>
-</form>
+        <div class="form-group mb-3">
+            <label asp-for="BirthDate" class="form-label">Date of Birth</label>
+            <input asp-for="BirthDate" class="form-control" type="date" />
+            <span asp-validation-for="BirthDate" class="text-danger small"></span>
+            <small class="text-muted">Must be before January 1, 1990</small>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="IsMarried" class="form-label">Marital Status</label>
+            <div class="form-check">
+                <input asp-for="IsMarried" class="form-check-input" type="checkbox" />
+                <label class="form-check-label" asp-for="IsMarried">Married</label>
+            </div>
+            <span asp-validation-for="IsMarried" class="text-danger small"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="Phone" class="form-label">Phone Number</label>
+            <input asp-for="Phone" class="form-control" placeholder="Enter phone number" />
+            <span asp-validation-for="Phone" class="text-danger small"></span>
+            <small class="text-muted">Maximum 10 characters</small>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="Salary" class="form-label">Salary</label>
+            <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input asp-for="Salary" class="form-control" type="number" step="0.01" min="500" placeholder="Enter salary" />
+            </div>
+            <span asp-validation-for="Salary" class="text-danger small"></span>
+            <small class="text-muted">Minimum salary is $500</small>
+        </div>
+
+        <div class="d-flex justify-content-between mt-4">
+            <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+            <button type="submit" class="btn btn-success">Save Changes</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            // Включаем jQuery валидацию
+            $("form").validate();
+
+            // Добавляем маску для телефона (если подключен jquery.mask.js)
+            $("#Phone").mask("9999999999");
+
+            // Форматирование числа для поля Salary
+            $("#Salary").on("blur", function () {
+                let value = $(this).val();
+                if (value && !isNaN(value)) {
+                    $(this).val(parseFloat(value).toFixed(2));
+                }
+            });
+        });
+    </script>
+}
