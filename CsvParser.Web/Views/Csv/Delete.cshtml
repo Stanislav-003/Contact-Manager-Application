@@ -17,6 +17,7 @@
     </thead>
     <tbody>
         @foreach (var csv in Model)
+
         {
             <tr>
                 <td>@csv.Name</td>
@@ -26,7 +27,10 @@
                 <td>@csv.Salary.ToString("C")</td>
                 <td>
                     <a href="@Url.Action("Edit", "Csv", new { id = csv.Id })" class="btn btn-primary">Edit</a>
+
+                    <!-- Форма для удаления -->
                     <form action="@Url.Action("Delete", "Csv", new { id = csv.Id })" method="post" style="display:inline;">
+                        @Html.AntiForgeryToken()
                         <input type="hidden" name="_method" value="DELETE" />
                         <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
                     </form>

@@ -1,7 +1,10 @@
 ﻿using CsvParser.Contracts.CSVs;
 using CsvParser.Web.Interfaces;
 using CsvParser.Web.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CsvParser.Web.Services;
 
@@ -16,7 +19,7 @@ public class CsvService : ICsvService
         _logger = logger;
     }
 
-    public async Task<IEnumerable<CsvViewModel>> GetAllAsync()
+    public async Task<OperationResult<IEnumerable<CsvViewModel>>> GetAllAsync()
     {
         try
         {
@@ -25,21 +28,21 @@ public class CsvService : ICsvService
 
             if (response.IsSuccessStatusCode)
             {
-                return await response.Content.ReadFromJsonAsync<List<CsvViewModel>>()
-                    ?? new List<CsvViewModel>();
+                var records = await response.Content.ReadFromJsonAsync<List<CsvViewModel>>();
+                return OperationResult<IEnumerable<CsvViewModel>>.Succeeded(records ?? Enumerable.Empty<CsvViewModel>());
             }
 
             _logger.LogError("Failed to get CSV records. Status code: {StatusCode}", response.StatusCode);
-            return new List<CsvViewModel>();
+            return OperationResult<IEnumerable<CsvViewModel>>.Failed($"Failed to get records. Status: {response.StatusCode}");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error occurred while getting all CSV records");
-            throw;
+            return OperationResult<IEnumerable<CsvViewModel>>.Failed(ex.Message);
         }
     }
 
-    public async Task<CsvViewModel?> GetByIdAsync(Guid id)
+    public async Task<OperationResult<CsvViewModel>> GetByIdAsync(Guid id)
     {
         try
         {
@@ -48,101 +51,121 @@ public class CsvService : ICsvService
 
             if (response.IsSuccessStatusCode)
             {
-                return await response.Content.ReadFromJsonAsync<CsvViewModel>();
+                var record = await response.Content.ReadFromJsonAsync<CsvViewModel>();
+                return record != null
+                    ? OperationResult<CsvViewModel>.Succeeded(record)
+                    : OperationResult<CsvViewModel>.Failed("Record not found");
             }
 
-            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-            {
-                _logger.LogInformation("CSV record with ID {Id} not found", id);
-                return null;
-            }
-
-            _logger.LogError("Failed to get CSV record. ID: {Id}, Status code: {StatusCode}",
-                id, response.StatusCode);
-            return null;
+            var error = await response.Content.ReadAsStringAsync();
+            _logger.LogError("Failed to get CSV record. ID: {Id}, Status: {Status}, Error: {Error}",
+                id, response.StatusCode, error);
+            return OperationResult<CsvViewModel>.Failed(error);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error occurred while getting CSV record with ID {Id}", id);
-            throw;
+            return OperationResult<CsvViewModel>.Failed(ex.Message);
         }
     }
 
-    public async Task<List<(CreateCSVRequest Record, string Error)>> SaveRecordsAsync(List<CreateCSVRequest> records)
+    public async Task<OperationResult<List<(CreateCSVRequest Record, string Error)>>> SaveRecordsAsync(List<CreateCSVRequest> records)
+    {
+        try
+        {
+            var client = _httpClientFactory.CreateClient("CsvApi");
+            var failedRecords = new List<(CreateCSVRequest Record, string Error)>();
+
+            foreach (var record in records)
+            {
+                var response = await client.PostAsJsonAsync("CSV", record);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("Failed to save CSV record. Name: {Name}, Status: {Status}, Error: {Error}",
+                        record.Name, response.StatusCode, error);
+                    failedRecords.Add((record, error));
+                }
+            }
+
+            return failedRecords.Any()
+                ? OperationResult<List<(CreateCSVRequest Record, string Error)>>.Failed("Some records failed to save")
+                : OperationResult<List<(CreateCSVRequest Record, string Error)>>.Succeeded(failedRecords);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while saving CSV records");
+            return OperationResult<List<(CreateCSVRequest Record, string Error)>>.Failed(ex.Message);
+        }
+    }
+
+    public async Task<OperationResult<CsvViewModel>> UpdateAsync(CsvViewModel model)
     {
         var client = _httpClientFactory.CreateClient("CsvApi");
-        var failedRecords = new List<(CreateCSVRequest Record, string Error)>();
+        var updateRequest = new UpdateCSVRequest(
+            model.Id,
+            model.Name,
+            model.BirthDate,
+            model.IsMarried,
+            model.Phone,
+            model.Salary);
 
-        foreach (var record in records)
+        var response = await client.PutAsJsonAsync("CSV", updateRequest);
+
+        if (response.IsSuccessStatusCode)
         {
-            var response = await client.PostAsJsonAsync("CSV", record);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var error = await response.Content.ReadAsStringAsync();
-                failedRecords.Add((record, error));
-            }
+            var updatedRecord = await response.Content.ReadFromJsonAsync<CsvViewModel>();
+            return OperationResult<CsvViewModel>.Succeeded(updatedRecord!);
         }
 
-        return failedRecords;
+        //if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        //{
+
+        //}
+
+        var validationErrors = await response.Content.ReadFromJsonAsync<ApiValidationResponse>();
+        var errorMessages = validationErrors?.Errors
+            .SelectMany(e => e.Value)
+            .ToList();
+
+        return OperationResult<CsvViewModel>.Failed(
+            string.Join(Environment.NewLine, errorMessages!));
     }
 
-    public async Task<(bool Success, string? Error)> UpdateAsync(CsvViewModel model)
+    public async Task<OperationResult<bool>> DeleteAsync(Guid id)
     {
-        try
+        var client = _httpClientFactory.CreateClient("CsvApi");
+        var response = await client.DeleteAsync($"CSV/{id}");
+
+        if (response.IsSuccessStatusCode)
         {
-            var client = _httpClientFactory.CreateClient("CsvApi");
-            var updateRequest = new UpdateCSVRequest(
-                model.Id,
-                model.Name,
-                model.BirthDate,
-                model.IsMarried,
-                model.Phone,
-                model.Salary);
+            return OperationResult<bool>.Succeeded(true);
+        }
 
-            var response = await client.PutAsJsonAsync("CSV", updateRequest);
+        var validationErrors = await response.Content.ReadFromJsonAsync<ApiValidationResponse>();
+        //var errorMessages = validationErrors?.Errors
+        //    .SelectMany(e => e.Value)
+        //    .ToList();
 
-            var responseContent = await response.Content.ReadAsStringAsync();
+        //if (errorMessages != null && errorMessages.Any())
+        //{
+        //    return OperationResult<bool>.Failed(string.Join(Environment.NewLine, errorMessages));
+        //}
 
-            if (response.IsSuccessStatusCode)
+        // Проверяем, что validationErrors не равен null, и ошибки существуют
+        if (validationErrors != null && validationErrors.Errors != null)
+        {
+            var errorMessages = validationErrors.Errors
+                .SelectMany(e => e.Value)
+                .ToList();
+
+            if (errorMessages.Any())
             {
-                return (true, null);
+                return OperationResult<bool>.Failed(string.Join(Environment.NewLine, errorMessages));
             }
-
-            _logger.LogError("Failed to update CSV record. ID: {Id}, Status: {Status}, Error: {Error}",
-                model.Id, response.StatusCode, responseContent);
-
-            return (false, responseContent);
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error occurred while updating CSV record with ID {Id}", model.Id);
-            return (false, ex.Message);
-        }
-    }
 
-    public async Task<(bool Success, string? Error)> DeleteAsync(Guid id)
-    {
-        try
-        {
-            var client = _httpClientFactory.CreateClient("CsvApi");
-            var response = await client.DeleteAsync($"CSV/{id}");
-
-            if (response.IsSuccessStatusCode)
-            {
-                return (true, null);
-            }
-
-            var error = await response.Content.ReadAsStringAsync();
-            _logger.LogError("Failed to delete CSV record. ID: {Id}, Error: {Error}",
-                id, error);
-            return (false, error);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error occurred while deleting CSV record with ID {Id}",
-                id);
-            return (false, ex.Message);
-        }
+        return OperationResult<bool>.Failed($"Не удалось удалить запись с ID: {id}. Код ответа: {response.StatusCode}");
     }
 }

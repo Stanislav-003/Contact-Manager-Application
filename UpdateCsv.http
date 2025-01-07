@@ -3,10 +3,10 @@
 Put {{host}}/CSV
 Content-Type: application/json
 {
-    "id": "5f2e5e00-64b4-4912-b065-22829f219bbb",
-    "name": "TestName10101010",
-    "birthDate": "1989-01-01T00:00:00",
+    "id": "9c4829f3-8c3f-497a-b98e-412f72cccab8",
+    "name": "Stanislav Severin",
+    "birthDate": "1980-01-01T00:00:00",
     "isMarried": true,
-    "phone": "12334344567890",
-    "salary": 5000.00
+    "phone": "1234562323789",
+    "salary": 100.00
 }

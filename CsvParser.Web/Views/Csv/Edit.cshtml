@@ -65,13 +65,10 @@
     <partial name="_ValidationScriptsPartial" />
     <script>
         $(document).ready(function () {
-            // Включаем jQuery валидацию
             $("form").validate();
 
-            // Добавляем маску для телефона (если подключен jquery.mask.js)
             $("#Phone").mask("9999999999");
 
-            // Форматирование числа для поля Salary
             $("#Salary").on("blur", function () {
                 let value = $(this).val();
                 if (value && !isNaN(value)) {

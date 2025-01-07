@@ -5,9 +5,9 @@ namespace CsvParser.Web.Interfaces;
 
 public interface ICsvService
 {
-    Task<IEnumerable<CsvViewModel>> GetAllAsync();
-    Task<CsvViewModel?> GetByIdAsync(Guid id);
-    Task<List<(CreateCSVRequest Record, string Error)>> SaveRecordsAsync(List<CreateCSVRequest> records);
-    Task<(bool Success, string? Error)> UpdateAsync(CsvViewModel model);
-    Task<(bool Success, string? Error)> DeleteAsync(Guid id);
+    Task<OperationResult<IEnumerable<CsvViewModel>>> GetAllAsync();
+    Task<OperationResult<CsvViewModel>> GetByIdAsync(Guid id);
+    Task<OperationResult<List<(CreateCSVRequest Record, string Error)>>> SaveRecordsAsync(List<CreateCSVRequest> records);
+    Task<OperationResult<CsvViewModel>> UpdateAsync(CsvViewModel model);
+    Task<OperationResult<bool>> DeleteAsync(Guid id);
 }
