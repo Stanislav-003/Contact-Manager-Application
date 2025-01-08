@@ -28,7 +28,6 @@
                 <td>
                     <a href="@Url.Action("Edit", "Csv", new { id = csv.Id })" class="btn btn-primary">Edit</a>
 
-                    <!-- Форма для удаления -->
                     <form action="@Url.Action("Delete", "Csv", new { id = csv.Id })" method="post" style="display:inline;">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="_method" value="DELETE" />

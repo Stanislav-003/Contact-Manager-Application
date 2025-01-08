@@ -1,11 +1,6 @@
 ﻿using CsvParser.Contracts.CSVs;
 using CsvParser.Web.Interfaces;
 using CsvParser.Web.Models;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using System.Collections.Generic;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CsvParser.Web.Services;
 
