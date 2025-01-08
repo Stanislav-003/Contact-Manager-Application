@@ -34,24 +34,24 @@ public class CsvController : Controller
             return View();
         }
 
-        var records = await CsvHelperExtensions.ParseCsvFile(file);
-        if (!records.Any())
+        var result = await CsvHelperExtensions.ParseCsvFile(file);
+        if (!result.Success)
         {
-            ModelState.AddModelError(string.Empty, "No records found in the uploaded file.");
+            ModelState.AddModelError(string.Empty, result.Error!);
             return View();
         }
 
-        var failedRecords = await _csvService.SaveRecordsAsync(records);
+        var failedRecords = await _csvService.SaveRecordsAsync(result.Data!);
 
         if (!failedRecords.Success)
         {
-            var errors = failedRecords.Error?.Split(Environment.NewLine) ?? new string[] { "Unknown error occurred." };
+            var errors = failedRecords.Error!.Split(Environment.NewLine);
             foreach (var error in errors)
             {
                 ModelState.AddModelError(string.Empty, error);
             }
 
-            return View(records);
+            return View(result.Data);
         }
 
         return RedirectToAction(nameof(Index));

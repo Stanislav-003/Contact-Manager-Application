@@ -4,74 +4,86 @@ using CsvParser.Contracts.CSVs;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.Globalization;
 using System.Net.Http;
+using CsvParser.Web.Models;
 
 namespace CsvParser.Web.Extensions;
 
 public static class CsvHelperExtensions
 {
-    public static async Task<List<CreateCSVRequest>> ParseCsvFile(IFormFile file)
+    public static async Task<OperationResult<List<CreateCSVRequest>>> ParseCsvFile(IFormFile file)
     {
-        using var stream = new MemoryStream();
-        await file.CopyToAsync(stream);
-        stream.Position = 0;
-
-        using var reader = new StreamReader(stream);
-        using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
+        try
         {
-            HeaderValidated = null,
-            MissingFieldFound = null
-        });
+            using var stream = new MemoryStream();
+            await file.CopyToAsync(stream);
+            stream.Position = 0;
 
-        if (!csv.Read() || !csv.ReadHeader())
-            throw new InvalidOperationException("Failed to read CSV headers.");
+            using var reader = new StreamReader(stream);
+            using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                HeaderValidated = null,
+                MissingFieldFound = null
+            });
 
-        ValidateHeaders(csv.HeaderRecord!);
+            if (!csv.Read() || !csv.ReadHeader())
+                return OperationResult<List<CreateCSVRequest>>.Failed("Failed to read CSV headers.");
 
-        var records = new List<CreateCSVRequest>();
-        var rowNumber = 1;
+            var headerValidationResult = ValidateHeaders(csv.HeaderRecord!);
+            if (!headerValidationResult.Success)
+            {
+                return OperationResult<List<CreateCSVRequest>>.Failed(headerValidationResult.Error!);
+            }
 
-        while (csv.Read())
-        {
-            rowNumber++;
-            records.Add(ParseRecord(csv, rowNumber));
+            var records = new List<CreateCSVRequest>();
+            var rowNumber = 1;
+
+            while (csv.Read())
+            {
+                rowNumber++;
+                var recordResult = ParseRecord(csv, rowNumber);
+                if (!recordResult.Success)
+                {
+                    return OperationResult<List<CreateCSVRequest>>.Failed(recordResult.Error!);
+                }
+                records.Add(recordResult.Data!);
+            }
+
+            return OperationResult<List<CreateCSVRequest>>.Succeeded(records);
         }
-
-        return records;
+        catch (Exception ex)
+        {
+            return OperationResult<List<CreateCSVRequest>>.Failed($"Unexpected error: {ex.Message}");
+        }
     }
 
-    private static void ValidateHeaders(string[] headers)
+    private static OperationResult<string> ValidateHeaders(string[] headers)
     {
         var requiredHeaders = new[] { "Name", "BirthDate", "IsMarried", "Phone", "Salary" };
         var missingHeaders = requiredHeaders.Except(headers, StringComparer.OrdinalIgnoreCase);
 
         if (missingHeaders.Any())
-            throw new InvalidOperationException($"Missing required columns: {string.Join(", ", missingHeaders)}");
+        {
+            return OperationResult<string>.Failed($"Missing required columns: {string.Join(", ", missingHeaders)}");
+        }
+
+        return OperationResult<string>.Succeeded("Headers validated successfully.");
     }
 
-    private static CreateCSVRequest ParseRecord(CsvReader csv, int rowNumber)
+    private static OperationResult<CreateCSVRequest> ParseRecord(CsvReader csv, int rowNumber)
     {
         try
         {
-            return new CreateCSVRequest(
+            return OperationResult<CreateCSVRequest>.Succeeded(new CreateCSVRequest(
                 csv.GetField<string>("Name")!,
                 csv.GetField<DateTime>("BirthDate"),
                 csv.GetField<bool>("IsMarried"),
                 csv.GetField<string>("Phone")!,
                 csv.GetField<decimal>("Salary")
-            );
+            ));
         }
         catch (CsvHelper.TypeConversion.TypeConverterException ex)
         {
-            throw new InvalidOperationException($"Data conversion error in row {rowNumber}: {ex.Message}");
-        }
-    }
-
-    public static void AddSaveErrorsToModelState(
-        List<(CreateCSVRequest record, string error)> failedRecords, ModelStateDictionary modelState)
-    {
-        foreach (var (record, error) in failedRecords)
-        {
-            modelState.AddModelError("", $"Error saving record {record.Name}: {error}");
+            return OperationResult<CreateCSVRequest>.Failed($"Data conversion error in row {rowNumber}: {ex.Message}");
         }
     }
 }

@@ -12,35 +12,24 @@ namespace CsvParser.Web.Services;
 public class CsvService : ICsvService
 {
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly ILogger<CsvService> _logger;
 
-    public CsvService(IHttpClientFactory httpClientFactory, ILogger<CsvService> logger)
+    public CsvService(IHttpClientFactory httpClientFactory)
     {
         _httpClientFactory = httpClientFactory;
-        _logger = logger;
     }
 
     public async Task<OperationResult<IEnumerable<CsvViewModel>>> GetAllAsync()
     {
-        try
-        {
-            var client = _httpClientFactory.CreateClient("CsvApi");
-            var response = await client.GetAsync("CSV");
+        var client = _httpClientFactory.CreateClient("CsvApi");
+        var response = await client.GetAsync("CSV");
 
-            if (response.IsSuccessStatusCode)
-            {
-                var records = await response.Content.ReadFromJsonAsync<List<CsvViewModel>>();
-                return OperationResult<IEnumerable<CsvViewModel>>.Succeeded(records ?? Enumerable.Empty<CsvViewModel>());
-            }
-
-            _logger.LogError("Failed to get CSV records. Status code: {StatusCode}", response.StatusCode);
-            return OperationResult<IEnumerable<CsvViewModel>>.Failed($"Failed to get records. Status: {response.StatusCode}");
-        }
-        catch (Exception ex)
+        if (response.IsSuccessStatusCode)
         {
-            _logger.LogError(ex, "Error occurred while getting all CSV records");
-            return OperationResult<IEnumerable<CsvViewModel>>.Failed(ex.Message);
+            var records = await response.Content.ReadFromJsonAsync<List<CsvViewModel>>();
+            return OperationResult<IEnumerable<CsvViewModel>>.Succeeded(records ?? Enumerable.Empty<CsvViewModel>());
         }
+
+        return OperationResult<IEnumerable<CsvViewModel>>.Failed($"Failed to get records. Status: {response.StatusCode}");
     }
 
     public async Task<OperationResult<List<CreateCSVRequest>>> SaveRecordsAsync(List<CreateCSVRequest> records)
@@ -90,11 +79,6 @@ public class CsvService : ICsvService
             return OperationResult<CsvViewModel>.Succeeded(updatedRecord!);
         }
 
-        //if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
-        //{
-
-        //}
-
         var validationErrors = await response.Content.ReadFromJsonAsync<ApiValidationResponse>();
         var errorMessages = validationErrors?.Errors
             .SelectMany(e => e.Value)
@@ -116,10 +100,6 @@ public class CsvService : ICsvService
                 ? OperationResult<CsvViewModel>.Succeeded(record)
                 : OperationResult<CsvViewModel>.Failed("Record not found");
         }
-
-        //var error = await response.Content.ReadAsStringAsync();
-
-        //return OperationResult<CsvViewModel>.Failed(error);
 
         var validationErrors = await response.Content.ReadFromJsonAsync<ApiValidationResponse>();
 
