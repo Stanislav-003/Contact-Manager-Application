@@ -4,6 +4,7 @@ using CsvParser.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CsvParser.Web.Services;
@@ -42,62 +43,32 @@ public class CsvService : ICsvService
         }
     }
 
-    public async Task<OperationResult<CsvViewModel>> GetByIdAsync(Guid id)
+    public async Task<OperationResult<List<CreateCSVRequest>>> SaveRecordsAsync(List<CreateCSVRequest> records)
     {
-        try
+        if (records == null || records.Count == 0)
         {
-            var client = _httpClientFactory.CreateClient("CsvApi");
-            var response = await client.GetAsync($"CSV/{id}");
+            return OperationResult<List<CreateCSVRequest>>.Failed("No records to save.");
+        }
 
-            if (response.IsSuccessStatusCode)
+        var client = _httpClientFactory.CreateClient("CsvApi");
+
+        foreach (var record in records)
+        {
+            var response = await client.PostAsJsonAsync("CSV", record);
+
+            if (!response.IsSuccessStatusCode)
             {
-                var record = await response.Content.ReadFromJsonAsync<CsvViewModel>();
-                return record != null
-                    ? OperationResult<CsvViewModel>.Succeeded(record)
-                    : OperationResult<CsvViewModel>.Failed("Record not found");
+                var validationErrors = await response.Content.ReadFromJsonAsync<ApiValidationResponse>();
+
+                var errorMessages = validationErrors?.Errors
+                    .SelectMany(e => e.Value)
+                    .ToList();
+
+                return OperationResult<List<CreateCSVRequest>>.Failed(string.Join(Environment.NewLine, errorMessages!));
             }
-
-            var error = await response.Content.ReadAsStringAsync();
-            _logger.LogError("Failed to get CSV record. ID: {Id}, Status: {Status}, Error: {Error}",
-                id, response.StatusCode, error);
-            return OperationResult<CsvViewModel>.Failed(error);
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error occurred while getting CSV record with ID {Id}", id);
-            return OperationResult<CsvViewModel>.Failed(ex.Message);
-        }
-    }
 
-    public async Task<OperationResult<List<(CreateCSVRequest Record, string Error)>>> SaveRecordsAsync(List<CreateCSVRequest> records)
-    {
-        try
-        {
-            var client = _httpClientFactory.CreateClient("CsvApi");
-            var failedRecords = new List<(CreateCSVRequest Record, string Error)>();
-
-            foreach (var record in records)
-            {
-                var response = await client.PostAsJsonAsync("CSV", record);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    var error = await response.Content.ReadAsStringAsync();
-                    _logger.LogError("Failed to save CSV record. Name: {Name}, Status: {Status}, Error: {Error}",
-                        record.Name, response.StatusCode, error);
-                    failedRecords.Add((record, error));
-                }
-            }
-
-            return failedRecords.Any()
-                ? OperationResult<List<(CreateCSVRequest Record, string Error)>>.Failed("Some records failed to save")
-                : OperationResult<List<(CreateCSVRequest Record, string Error)>>.Succeeded(failedRecords);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error occurred while saving CSV records");
-            return OperationResult<List<(CreateCSVRequest Record, string Error)>>.Failed(ex.Message);
-        }
+        return OperationResult<List<CreateCSVRequest>>.Succeeded(records);
     }
 
     public async Task<OperationResult<CsvViewModel>> UpdateAsync(CsvViewModel model)
@@ -129,8 +100,42 @@ public class CsvService : ICsvService
             .SelectMany(e => e.Value)
             .ToList();
 
-        return OperationResult<CsvViewModel>.Failed(
-            string.Join(Environment.NewLine, errorMessages!));
+        return OperationResult<CsvViewModel>.Failed(string.Join(Environment.NewLine, errorMessages!));
+    }
+
+
+    public async Task<OperationResult<CsvViewModel>> GetByIdAsync(Guid id)
+    {
+        var client = _httpClientFactory.CreateClient("CsvApi");
+        var response = await client.GetAsync($"CSV/{id}");
+
+        if (response.IsSuccessStatusCode)
+        {
+            var record = await response.Content.ReadFromJsonAsync<CsvViewModel>();
+            return record != null
+                ? OperationResult<CsvViewModel>.Succeeded(record)
+                : OperationResult<CsvViewModel>.Failed("Record not found");
+        }
+
+        //var error = await response.Content.ReadAsStringAsync();
+
+        //return OperationResult<CsvViewModel>.Failed(error);
+
+        var validationErrors = await response.Content.ReadFromJsonAsync<ApiValidationResponse>();
+
+        if (validationErrors != null && validationErrors.Errors != null)
+        {
+            var errorMessages = validationErrors.Errors
+                .SelectMany(e => e.Value)
+                .ToList();
+
+            if (errorMessages.Any())
+            {
+                return OperationResult<CsvViewModel>.Failed(string.Join(Environment.NewLine, errorMessages));
+            }
+        }
+
+        return OperationResult<CsvViewModel>.Failed($"Failed to get the record with ID: {id}. Response code: {response.StatusCode}");
     }
 
     public async Task<OperationResult<bool>> DeleteAsync(Guid id)
@@ -144,16 +149,7 @@ public class CsvService : ICsvService
         }
 
         var validationErrors = await response.Content.ReadFromJsonAsync<ApiValidationResponse>();
-        //var errorMessages = validationErrors?.Errors
-        //    .SelectMany(e => e.Value)
-        //    .ToList();
 
-        //if (errorMessages != null && errorMessages.Any())
-        //{
-        //    return OperationResult<bool>.Failed(string.Join(Environment.NewLine, errorMessages));
-        //}
-
-        // Проверяем, что validationErrors не равен null, и ошибки существуют
         if (validationErrors != null && validationErrors.Errors != null)
         {
             var errorMessages = validationErrors.Errors
@@ -166,6 +162,6 @@ public class CsvService : ICsvService
             }
         }
 
-        return OperationResult<bool>.Failed($"Не удалось удалить запись с ID: {id}. Код ответа: {response.StatusCode}");
+        return OperationResult<bool>.Failed($"Failed to delete record with ID: {id}. Response code: {response.StatusCode}");
     }
 }

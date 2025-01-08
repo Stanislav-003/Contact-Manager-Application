@@ -7,5 +7,5 @@ Content-Type: application/json
   "birthDate": "1989-01-01T00:00:00Z",
   "isMarried": true,
   "phone": "1234567859",
-  "salary": 5000.00
+  "salary": 110.00
 }

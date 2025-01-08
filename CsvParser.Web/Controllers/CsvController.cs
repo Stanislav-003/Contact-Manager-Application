@@ -28,13 +28,31 @@ public class CsvController : Controller
     [HttpPost]
     public async Task<IActionResult> Upload(IFormFile file)
     {
-        if (file == null || file.Length == 0) return View();
+        if (file == null || file.Length == 0 || !file.ContentType.Contains("csv"))
+        {
+            ModelState.AddModelError(string.Empty, "Invalid file. Please upload a valid CSV file.");
+            return View();
+        }
 
         var records = await CsvHelperExtensions.ParseCsvFile(file);
-        if (!records.Any()) return View();
+        if (!records.Any())
+        {
+            ModelState.AddModelError(string.Empty, "No records found in the uploaded file.");
+            return View();
+        }
 
         var failedRecords = await _csvService.SaveRecordsAsync(records);
-        if (failedRecords.Data!.Any()) return View();
+
+        if (!failedRecords.Success)
+        {
+            var errors = failedRecords.Error?.Split(Environment.NewLine) ?? new string[] { "Unknown error occurred." };
+            foreach (var error in errors)
+            {
+                ModelState.AddModelError(string.Empty, error);
+            }
+
+            return View(records);
+        }
 
         return RedirectToAction(nameof(Index));
     }
@@ -55,17 +73,18 @@ public class CsvController : Controller
         }
 
         var result = await _csvService.UpdateAsync(model);
-        if (!result.Success)
+
+        if (result.Success)
         {
-            var errors = result.Error!.Split(Environment.NewLine);
-            foreach (var error in errors)
-            {
-                ModelState.AddModelError(string.Empty, error);
-            }
-            return View(model);
+            return RedirectToAction(nameof(Index));
         }
 
-        return RedirectToAction(nameof(Index));
+        var errors = result.Error!.Split(Environment.NewLine);
+        foreach (var error in errors)
+        {
+            ModelState.AddModelError(string.Empty, error);
+        }
+        return View(model);
     }
 
     [HttpPost]
@@ -78,6 +97,6 @@ public class CsvController : Controller
             return RedirectToAction("Index");
         }
 
-        return BadRequest(new { Error = result.Error });
+        return BadRequest(new { result.Error });
     }
 }
