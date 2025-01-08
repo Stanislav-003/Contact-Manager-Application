@@ -7,21 +7,16 @@ namespace CsvParser.Application.CSV.Commands.UpdateCSV;
 
 public class UpdateCSVCommandHandler : IRequestHandler<UpdateCSVCommand, ErrorOr<CsvParser.Domain.Models.CSV>>
 {
-    private readonly ICSVRepository _csvRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public UpdateCSVCommandHandler(ICSVRepository csvRepository)
+    public UpdateCSVCommandHandler(IUnitOfWork unitOfWork)
     {
-        _csvRepository = csvRepository;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<ErrorOr<CsvParser.Domain.Models.CSV>> Handle(UpdateCSVCommand request, CancellationToken cancellationToken)
     {
-        var existingCsv = await _csvRepository.GetByIdAsync(request.Id);
-
-        //if (!await _csvRepository.ExistsAsync(request.Id))
-        //{
-        //    return Errors.CSV.NotFound;
-        //}
+        var existingCsv = await _unitOfWork.Csvs.GetByIdAsync(request.Id);
 
         if (existingCsv is null)
         {
@@ -35,7 +30,7 @@ public class UpdateCSVCommandHandler : IRequestHandler<UpdateCSVCommand, ErrorOr
             request.Phone,
             request.Salary);
 
-        await _csvRepository.UpdateAsync(existingCsv);
+        await _unitOfWork.CompleteAsync();
 
         return existingCsv;
     }

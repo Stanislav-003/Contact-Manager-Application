@@ -1,17 +1,16 @@
-﻿using ErrorOr;
+﻿using CsvParser.Application.Common.Interfaces.Persistence;
+using ErrorOr;
 using MediatR;
-using CsvParser.Domain.Models;
-using CsvParser.Application.Common.Interfaces.Persistence;
 
 namespace CsvParser.Application.CSV.Commands.CreateCSV;
 
 public class CreateCSVCommandHandler : IRequestHandler<CreateCSVCommand, ErrorOr<CsvParser.Domain.Models.CSV>>
 {
-    private readonly ICSVRepository _csvRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public CreateCSVCommandHandler(ICSVRepository csvRepository)
+    public CreateCSVCommandHandler(IUnitOfWork unitOfWork)
     {
-        _csvRepository = csvRepository;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<ErrorOr<Domain.Models.CSV>> Handle(CreateCSVCommand request, CancellationToken cancellationToken)
@@ -23,7 +22,8 @@ public class CreateCSVCommandHandler : IRequestHandler<CreateCSVCommand, ErrorOr
             request.Phone,
             request.Salary);
 
-        await _csvRepository.AddAsync(csv);
+        await _unitOfWork.Csvs.AddAsync(csv);
+        await _unitOfWork.CompleteAsync();
 
         return csv;
     }

@@ -7,21 +7,22 @@ namespace CsvParser.Application.CSV.Commands.DeleteCSV;
 
 public class DeleteCSVCommandHandler : IRequestHandler<DeleteCSVCommand, ErrorOr<bool>>
 {
-    private readonly ICSVRepository _csvRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public DeleteCSVCommandHandler(ICSVRepository csvRepository)
+    public DeleteCSVCommandHandler(IUnitOfWork unitOfWork)
     {
-        _csvRepository = csvRepository;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<ErrorOr<bool>> Handle(DeleteCSVCommand request, CancellationToken cancellationToken)
     {
-        if (!await _csvRepository.ExistsAsync(request.Id))
+        if (!await _unitOfWork.Csvs.ExistsAsync(request.Id))
         {
             return Errors.CSV.NotFound;
         }
 
-        await _csvRepository.DeleteAsync(request.Id);
+        await _unitOfWork.Csvs.DeleteAsync(request.Id);
+        await _unitOfWork.CompleteAsync();
 
         return true;
     }

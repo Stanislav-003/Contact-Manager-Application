@@ -6,15 +6,15 @@ namespace CsvParser.Application.CSV.Queries.ListCsvs;
 
 public class ListCsvsQueryHandler : IRequestHandler<ListCsvsQuery, ErrorOr<List<CsvParser.Domain.Models.CSV>>>
 {
-    private readonly ICSVRepository _csvRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public ListCsvsQueryHandler(ICSVRepository csvRepository)
+    public ListCsvsQueryHandler(IUnitOfWork unitOfWork)
     {
-        _csvRepository = csvRepository;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<ErrorOr<List<CsvParser.Domain.Models.CSV>>> Handle(ListCsvsQuery request, CancellationToken cancellationToken)
     {
-        return await _csvRepository.GetAllAsync();
+        return await _unitOfWork.Csvs.GetAllAsync();
     }
 }

@@ -8,16 +8,16 @@ namespace CsvParser.Application.CSV.Queries.Csv;
 
 public class CsvQueryHandler : IRequestHandler<CsvQuery, ErrorOr<CsvParser.Domain.Models.CSV>>
 {
-    private readonly ICSVRepository _csvRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public CsvQueryHandler(ICSVRepository csvRepository)
+    public CsvQueryHandler(IUnitOfWork unitOfWork)
     {
-        _csvRepository = csvRepository;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<ErrorOr<Domain.Models.CSV>> Handle(CsvQuery request, CancellationToken cancellationToken)
     {
-        var csv = await _csvRepository.GetByIdAsync(request.Id);
+        var csv = await _unitOfWork.Csvs.GetByIdAsync(request.Id);
 
         if (csv == null)
         {

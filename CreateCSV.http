@@ -3,9 +3,9 @@
 POST {{host}}/CSV
 Content-Type: application/json
 {
-  "name": "TestName10",
-  "birthDate": "1989-01-01T00:00:00Z",
+  "name": "IIIIIIIIIII",
+  "birthDate": "1956-01-01T00:00:00Z",
   "isMarried": true,
   "phone": "1234567859",
-  "salary": 110.00
+  "salary": 700.00
 }

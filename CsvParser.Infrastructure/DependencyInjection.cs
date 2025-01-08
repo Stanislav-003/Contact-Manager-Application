@@ -22,6 +22,7 @@ public static class DependencyInjection
             options.UseSqlServer("Data Source=STANISLAV003\\SQLEXPRESS;Initial Catalog=TestCsvParser;Integrated Security=True;Connect Timeout=30;Encrypt=True;Trust Server Certificate=True;Application Intent=ReadWrite;Multi Subnet Failover=False"));
 
         services.AddScoped<ICSVRepository, CSVRepository>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;
     }
