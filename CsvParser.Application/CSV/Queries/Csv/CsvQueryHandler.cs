@@ -17,13 +17,13 @@ public class CsvQueryHandler : IRequestHandler<CsvQuery, ErrorOr<CsvParser.Domai
 
     public async Task<ErrorOr<Domain.Models.CSV>> Handle(CsvQuery request, CancellationToken cancellationToken)
     {
-        var csv = await _unitOfWork.Csvs.GetByIdAsync(request.Id);
-
-        if (csv == null)
+        if (!await _unitOfWork.Csvs.ExistsAsync(request.Id))
         {
             return Errors.CSV.NotFound;
         }
 
-        return csv;
+        var csv = await _unitOfWork.Csvs.GetByIdAsync(request.Id);
+
+        return csv!;
     }
 }
