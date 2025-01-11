@@ -1,9 +1,11 @@
 @host=http://localhost:5053
 
-Get {{host}}/CSV
+Get {{host}}/CSV/?Name=Ok&OrderBy=Salary&SortDirection=Descending&PageSize=5
 Content-Type: application/json
 {
   
 }
 
 Get {{host}}/CSV/?Name=John&OrderBy=Salary&SortDirection=Descending&Page=2&PageSize=2
+
+"CSV?Name=Ok&OrderBy=BirthDate&SortDirection=asc&PageSize=5"

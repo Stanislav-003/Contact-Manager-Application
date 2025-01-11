@@ -32,7 +32,7 @@ public class CsvService : ICsvService
         if (pageSize.HasValue) queryParams.Add("PageSize", pageSize.ToString());
 
         var query = new FormUrlEncodedContent(queryParams.Where(kvp => kvp.Value != null));
-        var url = $"CSV?{await query.ReadAsStringAsync()}";
+        var url = $"CSV/?{await query.ReadAsStringAsync()}";
         var response = await client.GetAsync(url);
         var options = new JsonSerializerOptions
         {

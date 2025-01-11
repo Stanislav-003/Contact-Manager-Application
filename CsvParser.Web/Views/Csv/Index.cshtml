@@ -6,13 +6,13 @@
 
 <form method="get" action="@Url.Action("Index", "Csv")" class="mb-3">
     <div class="row">
-        <!-- Фильтрация -->
+        <!-- Фільтрація -->
         <div class="col-md-4">
             <label for="name" class="form-label">Filter by Name:</label>
             <input type="text" id="name" name="name" value="@Context.Request.Query["name"]" class="form-control" placeholder="Enter name...">
         </div>
 
-        <!-- Сортировка -->
+        <!-- Сортування -->
         <div class="col-md-3">
             <label for="orderBy" class="form-label">Sort by:</label>
             <select id="orderBy" name="orderBy" class="form-select">
@@ -27,12 +27,12 @@
             <label for="sortDirection" class="form-label">Direction:</label>
             <select id="sortDirection" name="sortDirection" class="form-select">
                 <option value="">-- Select --</option>
-                <option value="asc" selected="@(Context.Request.Query["sortDirection"] == "asc")">Ascending</option>
-                <option value="desc" selected="@(Context.Request.Query["sortDirection"] == "desc")">Descending</option>
+                <option value="Ascending" selected="@(Context.Request.Query["sortDirection"] == "Ascending")">Ascending</option>
+                <option value="Descending" selected="@(Context.Request.Query["sortDirection"] == "Descending")">Descending</option>
             </select>
         </div>
 
-        <!-- Пагинация -->
+        <!-- Пагінація -->
         <div class="col-md-2">
             <label for="pageSize" class="form-label">Page Size:</label>
             <select id="pageSize" name="pageSize" class="form-select">
@@ -80,18 +80,16 @@
     </tbody>
 </table>
 
-<!-- Навигация по страницам -->
 <div class="d-flex justify-content-between align-items-center">
     <div>Total Records: @ViewBag.TotalCount</div>
     <nav>
         <ul class="pagination">
             @{
                 int currentPage = int.TryParse(Context.Request.Query["page"], out var p) ? p : 1;
-                //int totalPages = (int)Math.Ceiling((double)ViewBag.TotalCount / (Context.Request.Query["pageSize"] == "" ? 10 : int.Parse(Context.Request.Query["pageSize"])));
-
-                int pageSize = 10; // значение по умолчанию
+                int totalCount = ViewBag.TotalCount ?? 0;  // добавляем значение по умолчанию
+                int pageSize = 10;
                 _ = int.TryParse(Context.Request.Query["pageSize"], out pageSize);
-                int totalPages = (int)Math.Ceiling((double)ViewBag.TotalCount / pageSize);
+                int totalPages = totalCount > 0 ? (int)Math.Ceiling((double)totalCount / pageSize) : 0;
 
                 for (int i = 1; i <= totalPages; i++)
                 {
