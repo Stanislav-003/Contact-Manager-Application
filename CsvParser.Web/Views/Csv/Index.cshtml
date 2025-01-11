@@ -86,7 +86,7 @@
         <ul class="pagination">
             @{
                 int currentPage = int.TryParse(Context.Request.Query["page"], out var p) ? p : 1;
-                int totalCount = ViewBag.TotalCount ?? 0;  // добавляем значение по умолчанию
+                int totalCount = ViewBag.TotalCount ?? 0; 
                 int pageSize = 10;
                 _ = int.TryParse(Context.Request.Query["pageSize"], out pageSize);
                 int totalPages = totalCount > 0 ? (int)Math.Ceiling((double)totalCount / pageSize) : 0;

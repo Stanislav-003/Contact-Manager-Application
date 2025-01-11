@@ -1,9 +1,7 @@
 ﻿using CsvHelper.Configuration;
 using CsvHelper;
 using CsvParser.Contracts.CSVs;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.Globalization;
-using System.Net.Http;
 using CsvParser.Web.Models;
 
 namespace CsvParser.Web.Extensions;
