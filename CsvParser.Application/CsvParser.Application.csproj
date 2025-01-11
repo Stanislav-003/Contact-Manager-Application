@@ -14,6 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CsvParser.Contracts\CsvParser.Contracts.csproj" />
     <ProjectReference Include="..\CsvParser.Domain\CsvParser.Domain.csproj" />
   </ItemGroup>
 

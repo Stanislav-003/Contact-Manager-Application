@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CsvParser.Application\CsvParser.Application.csproj" />
+    <ProjectReference Include="..\CsvParser.Contracts\CsvParser.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

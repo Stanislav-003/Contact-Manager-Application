@@ -1,4 +1,6 @@
-﻿using CsvParser.Application.CSV.Commands.CreateCSV;
+﻿using CsvParser.Application.Common.Filters;
+using CsvParser.Application.Common.Sorting;
+using CsvParser.Application.CSV.Commands.CreateCSV;
 using CsvParser.Application.CSV.Commands.DeleteCSV;
 using CsvParser.Application.CSV.Commands.UpdateCSV;
 using CsvParser.Application.CSV.Queries.Csv;
@@ -43,39 +45,50 @@ public class CSVController : ApiController
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAllCsvs()
+    public async Task<IActionResult> GetAllCsvs(
+        [FromQuery] CsvFilter? csvFilter = null,
+        [FromQuery] SortParams? sortParams = null,
+        [FromQuery] PageParams? pageParams = null)
     {
-        var query = new ListCsvsQuery();
+        csvFilter ??= new CsvFilter();
+        sortParams ??= new SortParams();
+        pageParams ??= new PageParams();
+
+        var query = new ListCsvsQuery(csvFilter, sortParams, pageParams);
 
         var csvsResult = await _mediator.Send(query);
 
         return csvsResult.Match(
-            csvs => Ok(csvs.Select(csv => new AllCsvsResponse(
-                csv.Id,
-                csv.Name,
-                csv.BirthDate,
-                csv.IsMarried,
-                csv.Phone,
-                csv.Salary))),
-            errors => Problem(errors));
+            csvPagedResult => Ok(new
+            {
+                TotalCount = csvPagedResult.TotalCount,
+                Data = csvPagedResult.Data.Select(csv => new AllCsvsResponse(
+                    csv.Id,
+                    csv.Name,
+                    csv.BirthDate,
+                    csv.IsMarried,
+                    csv.Phone,
+                    csv.Salary))
+            }),
+        errors => Problem(errors));
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetCsvById(Guid id)
     {
-        var query = new CsvQuery(id); 
+        var query = new CsvQuery(id);
 
         var csvResult = await _mediator.Send(query);
 
         return csvResult.Match(
-            csv => Ok(new CsvResponse( 
+            csv => Ok(new CsvResponse(
                 csv.Id,
                 csv.Name,
                 csv.BirthDate,
                 csv.IsMarried,
                 csv.Phone,
                 csv.Salary)),
-            errors => Problem(errors)); 
+            errors => Problem(errors));
     }
 
     [HttpPut]

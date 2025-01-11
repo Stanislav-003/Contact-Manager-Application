@@ -21,13 +21,4 @@ public class CSVParserDbContext : DbContext
 
         base.OnModelCreating(modelBuilder);
     }
-
-    //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    //{
-    //    if (!optionsBuilder.IsConfigured)
-    //    {
-    //        //optionsBuilder.UseSqlServer("Data Source=STANISLAV003\\SQLEXPRESS;Initial Catalog=TestCsvParser;Integrated Security=True;Connect Timeout=30;Encrypt=True;Trust Server Certificate=True;Application Intent=ReadWrite;Multi Subnet Failover=False");
-    //        optionsBuilder.UseSqlServer(_configuration.GetConnectionString("DefaultConnection"));
-    //    }
-    //}
 }

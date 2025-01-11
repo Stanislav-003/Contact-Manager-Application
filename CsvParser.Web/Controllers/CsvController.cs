@@ -3,6 +3,8 @@ using CsvParser.Web.Interfaces;
 using CsvParser.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using CsvParser.Application.Common.Filters;
+using CsvParser.Application.Common.Sorting;
 
 namespace CsvParser.Web.Controllers;
 
@@ -16,10 +18,15 @@ public class CsvController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(string? name, string? orderBy, string? sortDirection, int? page, int? pageSize)
     {
-        var result = await _csvService.GetAllAsync();
-        return result.Success ? View(result.Data!.ToList()) : View(Enumerable.Empty<CsvViewModel>());
+        var result = await _csvService.GetAllAsync(name, orderBy, sortDirection, page, pageSize);
+        if (result.Success)
+        {
+            ViewBag.TotalCount = result.Data!.TotalCount;
+            return View(result.Data!.Data);
+        }
+        return View(Enumerable.Empty<CsvViewModel>());
     }
 
     [HttpGet]

@@ -8,7 +8,7 @@ public class CsvViewModel
     
     [Required(ErrorMessage = "Name is required")]
     [StringLength(30, ErrorMessage = "Name cannot be longer than 30 characters")]
-    public string Name { get; set; }
+    public required string Name { get; set; } 
     
     [Required(ErrorMessage = "Birth date is required")]
     [Display(Name = "Birth Date")]
@@ -20,7 +20,7 @@ public class CsvViewModel
 
     [Required(ErrorMessage = "Phone is required")]
     [StringLength(10, ErrorMessage = "Phone cannot be longer than 10 characters")]
-    public string Phone { get; set; }
+    public required string Phone { get; set; }
 
 
     [Required(ErrorMessage = "Salary is required")]

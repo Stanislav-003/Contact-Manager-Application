@@ -3,4 +3,7 @@
 Get {{host}}/CSV
 Content-Type: application/json
 {
+  
 }
+
+Get {{host}}/CSV/?Name=John&OrderBy=Salary&SortDirection=Descending&Page=2&PageSize=2

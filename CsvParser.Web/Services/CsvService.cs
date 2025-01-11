@@ -1,6 +1,9 @@
-﻿using CsvParser.Contracts.CSVs;
+﻿using CsvParser.Application.Common.Filters;
+using CsvParser.Application.Common.Sorting;
+using CsvParser.Contracts.CSVs;
 using CsvParser.Web.Interfaces;
 using CsvParser.Web.Models;
+using System.Text.Json;
 
 namespace CsvParser.Web.Services;
 
@@ -13,18 +16,36 @@ public class CsvService : ICsvService
         _httpClientFactory = httpClientFactory;
     }
 
-    public async Task<OperationResult<IEnumerable<CsvViewModel>>> GetAllAsync()
+    public async Task<OperationResult<CsvPagedResult<CsvViewModel>>> GetAllAsync(
+        string? name,
+        string? orderBy,
+        string? sortDirection,
+        int? page,
+        int? pageSize)
     {
         var client = _httpClientFactory.CreateClient("CsvApi");
-        var response = await client.GetAsync("CSV");
+        var queryParams = new Dictionary<string, string?>();
+        if (!string.IsNullOrEmpty(name)) queryParams.Add("Name", name);
+        if (!string.IsNullOrEmpty(orderBy)) queryParams.Add("OrderBy", orderBy);
+        if (!string.IsNullOrEmpty(sortDirection)) queryParams.Add("SortDirection", sortDirection);
+        if (page.HasValue) queryParams.Add("Page", page.ToString());
+        if (pageSize.HasValue) queryParams.Add("PageSize", pageSize.ToString());
+
+        var query = new FormUrlEncodedContent(queryParams.Where(kvp => kvp.Value != null));
+        var url = $"CSV?{await query.ReadAsStringAsync()}";
+        var response = await client.GetAsync(url);
+        var options = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        };
 
         if (response.IsSuccessStatusCode)
         {
-            var records = await response.Content.ReadFromJsonAsync<List<CsvViewModel>>();
-            return OperationResult<IEnumerable<CsvViewModel>>.Succeeded(records ?? Enumerable.Empty<CsvViewModel>());
+            var responseFromApi = await response.Content.ReadFromJsonAsync<CsvPagedResult<CsvViewModel>>(options);
+            return OperationResult<CsvPagedResult<CsvViewModel>>.Succeeded(responseFromApi!);
         }
 
-        return OperationResult<IEnumerable<CsvViewModel>>.Failed($"Failed to get records. Status: {response.StatusCode}");
+        return OperationResult<CsvPagedResult<CsvViewModel>>.Failed($"Failed to get records. Status: {response.StatusCode}");
     }
 
     public async Task<OperationResult<List<CreateCSVRequest>>> SaveRecordsAsync(List<CreateCSVRequest> records)
