@@ -1,6 +1,6 @@
 @host=http://localhost:5053
 
-Get {{host}}/CSV/?Name=Ok&OrderBy=Salary&SortDirection=Descending&PageSize=5
+Get {{host}}/CSV/?Name=Ok&OrderBy=Salary&SortDirection=Desc&PageSize=5
 Content-Type: application/json
 {
   

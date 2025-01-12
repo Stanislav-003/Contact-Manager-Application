@@ -26,6 +26,7 @@ public class CsvController : Controller
             ViewBag.TotalCount = result.Data!.TotalCount;
             return View(result.Data!.Data);
         }
+        
         ViewBag.TotalCount = 0;
 
         return View(Enumerable.Empty<CsvViewModel>().ToList());
