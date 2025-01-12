@@ -57,6 +57,8 @@ public class CsvService : ICsvService
 
         var client = _httpClientFactory.CreateClient("CsvApi");
 
+        var errors = new List<string>();
+
         foreach (var record in records)
         {
             var response = await client.PostAsJsonAsync("CSV", record);
@@ -65,12 +67,25 @@ public class CsvService : ICsvService
             {
                 var validationErrors = await response.Content.ReadFromJsonAsync<ApiValidationResponse>();
 
-                var errorMessages = validationErrors?.Errors
-                    .SelectMany(e => e.Value)
-                    .ToList();
+                //var errorMessages = validationErrors?.Errors
+                //    .SelectMany(e => e.Value)
+                //    .ToList();
 
-                return OperationResult<List<CreateCSVRequest>>.Failed(string.Join(Environment.NewLine, errorMessages!));
+                //return OperationResult<List<CreateCSVRequest>>.Failed(string.Join(Environment.NewLine, errorMessages!));
+
+                if (validationErrors?.Errors != null)
+                {
+                    var errorMessages = validationErrors.Errors
+                        .SelectMany(e => e.Value)
+                        .Select(msg => $"Record: {record} - Error: {msg}");
+                    errors.AddRange(errorMessages);
+                }
             }
+        }
+
+        if (errors.Any())
+        {
+            return OperationResult<List<CreateCSVRequest>>.Failed(string.Join(Environment.NewLine, errors));
         }
 
         return OperationResult<List<CreateCSVRequest>>.Succeeded(records);
